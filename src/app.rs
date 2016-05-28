@@ -35,7 +35,7 @@ impl App for GameApp {
         // TODO: Process input?
 
         // Update game world.
-        self.world.update(dt as f32);
+        self.world.update(midgar, dt as f32);
 
         // Render game world.
         self.renderer.render(midgar, dt as f32, &self.world);

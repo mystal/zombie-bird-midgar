@@ -50,6 +50,7 @@ impl GameRenderer {
         // TODO: Draw world.
         match world.game_state() {
             GameState::Running => {
+                self.draw_bird(world, &mut target);
             },
             GameState::Ready => {
                 self.draw_bird(world, &mut target);
@@ -71,6 +72,7 @@ impl GameRenderer {
 
     fn draw_bird<S: Surface>(&mut self, world: &GameWorld, target: &mut S) {
         self.bird_sprite.set_position(world.bird().position());
+        self.bird_sprite.set_rotation(world.bird().rotation());
         self.sprite_renderer.draw_sprite(&self.bird_sprite, &self.projection, target);
     }
 

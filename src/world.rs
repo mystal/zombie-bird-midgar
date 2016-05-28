@@ -1,3 +1,5 @@
+use midgar::{Midgar, VirtualKeyCode};
+
 use bird::Bird;
 
 
@@ -30,21 +32,26 @@ impl GameWorld {
         }
     }
 
-    pub fn update(&mut self, dt: f32) {
+    pub fn update(&mut self, midgar: &Midgar, dt: f32) {
         self.run_time += dt;
 
         match self.game_state {
-            GameState::Menu | GameState::Ready => self.update_ready(dt),
-            GameState::Running => self.update_running(dt),
+            GameState::Menu | GameState::Ready => self.update_ready(midgar, dt),
+            GameState::Running => self.update_running(midgar, dt),
             _ => {},
         }
     }
 
-    fn update_ready(&mut self, dt: f32) {
+    fn update_ready(&mut self, midgar: &Midgar, dt: f32) {
+        if midgar.input().was_key_pressed(&VirtualKeyCode::Space) {
+            self.game_state = GameState::Running;
+        }
+
         self.bird.update_ready(self.run_time);
     }
 
-    fn update_running(&mut self, dt: f32) {
+    fn update_running(&mut self, midgar: &Midgar, dt: f32) {
+        self.bird.update_running(midgar, dt);
     }
 
     pub fn game_state(&self) -> GameState {
