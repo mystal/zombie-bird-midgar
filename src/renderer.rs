@@ -1,5 +1,7 @@
+use std::rc::Rc;
+
 use cgmath;
-use midgar::{Midgar, MagnifySamplerFilter, Surface};
+use midgar::{Midgar, MagnifySamplerFilter, Surface, Texture2d};
 use midgar::sprite::{Sprite, SpriteRenderer};
 
 use world::{GameState, GameWorld};
@@ -14,27 +16,54 @@ pub struct GameRenderer {
 
     projection: cgmath::Matrix4<f32>,
 
+    texture: Rc<Texture2d>,
+    // logoTexture: Rc<Texture2d>,
+
+    // TODO: Make these TextureRegions since we don't need to store state with them.
     bird_sprite: Sprite,
+    // public static TextureRegion logo, zbLogo;
+    bg: Sprite,
+    grass: Sprite,
+
+    // public static Animation birdAnimation;
+    // public static TextureRegion bird, birdDown, birdUp;
+    // public static TextureRegion skullUp, skullDown, bar;
+    // public static TextureRegion playButtonUp, playButtonDown;
 }
 
 impl GameRenderer {
     pub fn new(midgar: &Midgar) -> Self {
-        let texture = midgar.graphics().load_texture("assets/texture.png");
-        // TODO: Load sprites.
-        let mut bird_sprite = Sprite::with_sub_field(texture, (153, 116), (17, 12));
-        bird_sprite.set_magnify_filter(Some(MagnifySamplerFilter::Nearest));
-        bird_sprite.set_alpha(true);
-
         let (screen_width, screen_height) = midgar.graphics().screen_size();
         let game_width = 136.0f32;
         let game_height = screen_height as f32 / (screen_width as f32 / game_width);
+        let mid_point_y = (game_height / 2.0) - 5.0;
+
+        let texture = midgar.graphics().load_texture("assets/texture.png");
+        let texture = Rc::new(texture);
+
+        // Load bird.
+        let mut bird_sprite = Sprite::with_sub_field(texture.clone(), (153, 116), (17, 12));
+        bird_sprite.set_magnify_filter(Some(MagnifySamplerFilter::Nearest));
+        bird_sprite.set_alpha(true);
+        // Load background.
+        let mut bg = Sprite::with_sub_field(texture.clone(), (0, 85), (136, 43));
+        bg.set_magnify_filter(Some(MagnifySamplerFilter::Nearest));
+        bg.set_position(cgmath::vec2(0.0, mid_point_y - 63.0));
+        // Load grass.
+        let mut grass = Sprite::with_sub_field(texture.clone(), (0, 74), (143, 11));
+        grass.set_magnify_filter(Some(MagnifySamplerFilter::Nearest));
+        // TODO: Load other sprites.
 
         GameRenderer {
             sprite_renderer: SpriteRenderer::new(&midgar.graphics().display),
             //shape_renderer: glutils::ShapeRenderer::new(&midgar.graphics().display),
             projection: cgmath::ortho(0.0, game_width, 0.0, game_height, -1.0, 1.0),
 
+            texture: texture,
+
             bird_sprite: bird_sprite,
+            bg: bg,
+            grass: grass,
         }
     }
 
@@ -43,9 +72,14 @@ impl GameRenderer {
         let mut target = midgar.graphics().display.draw();
         target.clear_color(CLEAR_COLOR[0], CLEAR_COLOR[1], CLEAR_COLOR[2], CLEAR_COLOR[3]);
 
-        // TODO: Draw background shapes in background.
+        // TODO: Draw background shapes.
 
-        // TODO: Draw grass and pipes.
+        // Draw world background.
+        self.sprite_renderer.draw_sprite(&self.bg, &self.projection, &mut target);
+
+        // Draw grass and pipes.
+        self.draw_grass(world, &mut target);
+        self.draw_pipes(world, &mut target);
 
         // TODO: Draw world.
         match world.game_state() {
@@ -76,13 +110,13 @@ impl GameRenderer {
         self.sprite_renderer.draw_sprite(&self.bird_sprite, &self.projection, target);
     }
 
-    fn draw_grass(&mut self, world: &GameWorld) {
-        // batcher.draw(grass, frontGrass.getX(), frontGrass.getY(),
-        //         frontGrass.getWidth(), frontGrass.getHeight());
-        // batcher.draw(grass, backGrass.getX(), backGrass.getY(),
-        //         backGrass.getWidth(), backGrass.getHeight());
+    fn draw_grass<S: Surface>(&mut self, world: &GameWorld, target: &mut S) {
+        self.grass.set_position(world.scroller().front_grass().position());
+        self.sprite_renderer.draw_sprite(&self.grass, &self.projection, target);
+        self.grass.set_position(world.scroller().back_grass().position());
+        self.sprite_renderer.draw_sprite(&self.grass, &self.projection, target);
     }
 
-    fn draw_pipes(&mut self, world: &GameWorld) {
+    fn draw_pipes<S: Surface>(&mut self, world: &GameWorld, target: &mut S) {
     }
 }

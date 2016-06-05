@@ -4,6 +4,7 @@ extern crate midgar;
 mod app;
 mod bird;
 mod renderer;
+mod scroll_handler;
 mod world;
 
 
