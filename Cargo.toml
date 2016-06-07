@@ -6,3 +6,4 @@ authors = ["Gabriel Martinez <reitaka@gmail.com>"]
 [dependencies]
 cgmath = "^0.9.1"
 midgar = { path = "../midgar-engine/midgar" }
+rand = "^0.3.0"

@@ -1,4 +1,6 @@
 use cgmath::{self, Vector2};
+use rand;
+use rand::distributions::{IndependentSample, Range};
 
 
 // ScrollHandler will use the constants below to determine
@@ -11,9 +13,9 @@ const PIPE_GAP: f32 = 49.0;
 pub struct ScrollHandler {
     front_grass: Grass,
     back_grass: Grass,
-    // pipe1: Pipe,
-    // pipe2: Pipe,
-    // pipe3: Pipe,
+    pipe1: Pipe,
+    pipe2: Pipe,
+    pipe3: Pipe,
 }
 
 impl ScrollHandler {
@@ -23,17 +25,17 @@ impl ScrollHandler {
         let front_grass = Grass::new(0.0, y_pos, 143, 11, SCROLL_SPEED);
         let back_grass = Grass::new(front_grass.get_tail_x(), y_pos, 143, 11, SCROLL_SPEED);
 
-        // let pipe1: Pipe::new(210, 0, 22, 60, SCROLL_SPEED, y_pos);
-        // let pipe2: Pipe::new(pipe1.get_tail_x() + PIPE_GAP, 0, 22, 70, SCROLL_SPEED, y_pos);
-        // let pipe3: Pipe::new(pipe2.get_tail_x() + PIPE_GAP, 0, 22, 60, SCROLL_SPEED, y_pos);
+        let pipe1 = Pipe::new(210.0, y_pos, 22, 60, SCROLL_SPEED, y_pos);
+        let pipe2 = Pipe::new(pipe1.get_tail_x() + PIPE_GAP, y_pos, 22, 70, SCROLL_SPEED, y_pos);
+        let pipe3 = Pipe::new(pipe2.get_tail_x() + PIPE_GAP, y_pos, 22, 60, SCROLL_SPEED, y_pos);
 
         ScrollHandler {
             front_grass: front_grass,
             back_grass: back_grass,
 
-            // pipe1: pipe1,
-            // pipe2: pipe2,
-            // pipe3: pipe3,
+            pipe1: pipe1,
+            pipe2: pipe2,
+            pipe3: pipe3,
         }
     }
 
@@ -43,7 +45,7 @@ impl ScrollHandler {
 
     pub fn update_running(&mut self, dt: f32) {
         self.update_grass(dt);
-        // self.update_pipes(dt);
+        self.update_pipes(dt);
     }
 
     fn update_grass(&mut self, dt: f32) {
@@ -58,35 +60,35 @@ impl ScrollHandler {
         }
     }
 
-    // fn update_pipes(&mut self, dt: f32) {
-    //     self.pipe1.update(dt);
-    //     self.pipe2.update(dt);
-    //     self.pipe3.update(dt);
+    fn update_pipes(&mut self, dt: f32) {
+        self.pipe1.update(dt);
+        self.pipe2.update(dt);
+        self.pipe3.update(dt);
 
-    //     // Check if any pipe has scrolled offscreen and reset accordingly.
-    //     if self.pipe1.is_scrolled_left() {
-    //         self.pipe1.reset(self.pipe3.get_tail_x() + PIPE_GAP);
-    //     } else if self.pipe2.is_scrolled_left() {
-    //         self.pipe2.reset(self.pipe1.get_tail_x() + PIPE_GAP);
-    //     } else if self.pipe3.is_scrolled_left() {
-    //         self.pipe3.reset(self.pipe2.get_tail_x() + PIPE_GAP);
-    //     }
-    // }
+        // Check if any pipe has scrolled offscreen and reset accordingly.
+        if self.pipe1.is_scrolled_left() {
+            self.pipe1.reset(self.pipe3.get_tail_x() + PIPE_GAP);
+        } else if self.pipe2.is_scrolled_left() {
+            self.pipe2.reset(self.pipe1.get_tail_x() + PIPE_GAP);
+        } else if self.pipe3.is_scrolled_left() {
+            self.pipe3.reset(self.pipe2.get_tail_x() + PIPE_GAP);
+        }
+    }
 
     pub fn stop(&mut self) {
         self.front_grass.stop();
         self.back_grass.stop();
-        // self.pipe1.stop();
-        // self.pipe2.stop();
-        // self.pipe3.stop();
+        self.pipe1.stop();
+        self.pipe2.stop();
+        self.pipe3.stop();
     }
 
     pub fn on_restart(&mut self) {
         self.front_grass.on_restart(0.0, SCROLL_SPEED);
         self.back_grass.on_restart(self.front_grass.get_tail_x(), SCROLL_SPEED);
-        // self.pipe1.on_restart(210, SCROLL_SPEED);
-        // self.pipe2.on_restart(pipe1.get_tail_x() + PIPE_GAP, SCROLL_SPEED);
-        // self.pipe3.on_restart(pipe2.get_tail_x() + PIPE_GAP, SCROLL_SPEED);
+        self.pipe1.on_restart(210.0, SCROLL_SPEED);
+        self.pipe2.on_restart(self.pipe1.get_tail_x() + PIPE_GAP, SCROLL_SPEED);
+        self.pipe3.on_restart(self.pipe2.get_tail_x() + PIPE_GAP, SCROLL_SPEED);
     }
 
     pub fn front_grass(&self) -> &Grass {
@@ -97,17 +99,17 @@ impl ScrollHandler {
         &self.back_grass
     }
 
-    // pub fn pipe1(&self) -> &Pipe {
-    //     &self.pipe1
-    // }
+    pub fn pipe1(&self) -> &Pipe {
+        &self.pipe1
+    }
 
-    // pub fn pipe2(&self) -> &Pipe {
-    //     &self.pipe2
-    // }
+    pub fn pipe2(&self) -> &Pipe {
+        &self.pipe2
+    }
 
-    // pub fn pipe3(&self) -> &Pipe {
-    //     &self.pipe3
-    // }
+    pub fn pipe3(&self) -> &Pipe {
+        &self.pipe3
+    }
 }
 
 
@@ -159,16 +161,87 @@ impl Grass {
     }
 }
 
-// const VERTICAL_GAP: u32 = 45;
-// const SKULL_WIDTH: u32 = 24;
-// const SKULL_HEIGHT: u32 = 11;
+const VERTICAL_GAP: u32 = 45;
+const SKULL_WIDTH: u32 = 24;
+const SKULL_HEIGHT: u32 = 11;
 
-// pub struct Pipe {
-//     scrollable: Scrollable,
-//     //Rectangle skullUp, skullDown, barUp, barDown;
-//     ground_y: f32;
-//     is_scored: bool;
-// }
+pub struct Pipe {
+    scrollable: Scrollable,
+    range: Range<u32>,
+    //Rectangle skullUp, skullDown, barUp, barDown,
+    ground_y: f32,
+    is_scored: bool,
+}
+
+impl Pipe {
+    fn new(x: f32, y: f32, width: u32, height: u32, scroll_speed: f32, ground_y: f32) -> Self {
+        Pipe {
+            scrollable: Scrollable::new(x, y, width, height, scroll_speed),
+            range: Range::new(0, 90),
+            ground_y: ground_y,
+            is_scored: false,
+        }
+    }
+
+    fn update(&mut self, dt: f32) {
+        self.scrollable.update(dt);
+
+        // TODO: Update pipe Rectangles
+
+        // The set() method allows you to set the top left corner's x, y
+        // coordinates, along with the width and height of the rectangle.
+        // barUp.set(position.x, position.y, width, height);
+        // barDown.set(position.x, position.y + height + VERTICAL_GAP, width,
+        //         groundY - (position.y + height + VERTICAL_GAP));
+
+        // Our skull width is 24. The bar is only 22 pixels wide. So the skull
+        // must be shifted by 1 pixel to the left (so that the skull is centered
+        // with respect to its bar).
+
+        // This shift is equivalent to: (SKULL_WIDTH - width) / 2
+        // skullUp.set(position.x - (SKULL_WIDTH - width) / 2, position.y + height
+        //         - SKULL_HEIGHT, SKULL_WIDTH, SKULL_HEIGHT);
+        // skullDown.set(position.x - (SKULL_WIDTH - width) / 2, barDown.y,
+        //         SKULL_WIDTH, SKULL_HEIGHT);
+    }
+
+    fn on_restart(&mut self, new_x: f32, scroll_speed: f32) {
+        self.scrollable.velocity.x = scroll_speed;
+        self.reset(new_x);
+    }
+
+    fn reset(&mut self, new_x: f32) {
+        self.scrollable.reset(new_x);
+
+        let mut rng = rand::thread_rng();
+        self.scrollable.height = self.range.ind_sample(&mut rng) + 15;
+        self.is_scored = false;
+    }
+
+    fn stop(&mut self) {
+        self.scrollable.stop();
+    }
+
+    pub fn is_scrolled_left(&self) -> bool {
+        self.scrollable.is_scrolled_left()
+    }
+
+    pub fn get_tail_x(&self) -> f32 {
+        self.scrollable.get_tail_x()
+    }
+
+    pub fn position(&self) -> Vector2<f32> {
+        self.scrollable.position()
+    }
+
+    pub fn width(&self) -> u32 {
+        self.scrollable.width()
+    }
+
+    pub fn height(&self) -> u32 {
+        self.scrollable.height()
+    }
+}
 
 struct Scrollable {
     position: Vector2<f32>,

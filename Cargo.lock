@@ -4,6 +4,7 @@ version = "0.1.0"
 dependencies = [
  "cgmath 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "midgar 0.1.0",
+ "rand 0.3.14 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
