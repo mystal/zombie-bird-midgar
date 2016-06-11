@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use cgmath;
 use midgar::{Midgar, MagnifySamplerFilter, Surface, Texture2d};
+use midgar::shape::ShapeRenderer;
 use midgar::sprite::{Sprite, SpriteRenderer};
 use midgar::texture_region::TextureRegion;
 
@@ -14,7 +15,7 @@ const CLEAR_COLOR: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
 
 pub struct GameRenderer {
     sprite_renderer: SpriteRenderer,
-    //shape_renderer: glutils::ShapeRenderer,
+    shape_renderer: ShapeRenderer,
 
     projection: cgmath::Matrix4<f32>,
 
@@ -69,7 +70,7 @@ impl GameRenderer {
 
         GameRenderer {
             sprite_renderer: SpriteRenderer::new(&midgar.graphics().display),
-            //shape_renderer: glutils::ShapeRenderer::new(&midgar.graphics().display),
+            shape_renderer: ShapeRenderer::new(&midgar.graphics().display),
             projection: cgmath::ortho(0.0, game_width, 0.0, game_height, -1.0, 1.0),
 
             texture: texture,
@@ -88,7 +89,15 @@ impl GameRenderer {
         let mut target = midgar.graphics().display.draw();
         target.clear_color(CLEAR_COLOR[0], CLEAR_COLOR[1], CLEAR_COLOR[2], CLEAR_COLOR[3]);
 
-        // TODO: Draw background shapes.
+        // Draw Background color
+        let color = [55.0 / 255.0, 80.0 / 255.0, 100.0 / 255.0];
+        self.shape_renderer.draw_filled_rect(0.0, world.mid_point_y() as f32 - 23.0, 136.0, world.mid_point_y() as f32 + 23.0,
+                                             color, &self.projection, &mut target);
+
+        // Draw Dirt
+        let color = [147.0 / 255.0, 80.0 / 255.0, 27.0 / 255.0];
+        self.shape_renderer.draw_filled_rect(0.0, 0.0, 136.0, 52.0, color,
+                                             &self.projection, &mut target);
 
         // Draw world background.
         self.sprite_renderer.draw_sprite(&self.bg, &self.projection, &mut target);
