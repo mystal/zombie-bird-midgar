@@ -22,8 +22,8 @@ impl ScrollHandler {
     // Constructor receives a float that tells us where we need to create our
     // Grass and Pipe objects.
     pub fn new(y_pos: f32) -> Self {
-        let front_grass = Grass::new(0.0, y_pos, 143, 11, SCROLL_SPEED);
-        let back_grass = Grass::new(front_grass.get_tail_x(), y_pos, 143, 11, SCROLL_SPEED);
+        let front_grass = Grass::new(0.0, y_pos - 11.0, 143, 11, SCROLL_SPEED);
+        let back_grass = Grass::new(front_grass.get_tail_x(), y_pos - 11.0, 143, 11, SCROLL_SPEED);
 
         let pipe1 = Pipe::new(210.0, y_pos, 22, 60, SCROLL_SPEED, y_pos);
         let pipe2 = Pipe::new(pipe1.get_tail_x() + PIPE_GAP, y_pos, 22, 70, SCROLL_SPEED, y_pos);

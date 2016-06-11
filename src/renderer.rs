@@ -3,6 +3,7 @@ use std::rc::Rc;
 use cgmath;
 use midgar::{Midgar, MagnifySamplerFilter, Surface, Texture2d};
 use midgar::sprite::{Sprite, SpriteRenderer};
+use midgar::texture_region::TextureRegion;
 
 use scroll_handler::Pipe;
 use world::{GameState, GameWorld};
@@ -29,7 +30,7 @@ pub struct GameRenderer {
     grass: Sprite,
     skull_up: Sprite,
     skull_down: Sprite,
-    bar: Sprite,
+    bar: TextureRegion,
 
     // TextureRegion logo, zbLogo;
     // TextureRegion playButtonUp, playButtonDown;
@@ -40,7 +41,7 @@ impl GameRenderer {
         let (screen_width, screen_height) = midgar.graphics().screen_size();
         let game_width = 136.0f32;
         let game_height = screen_height as f32 / (screen_width as f32 / game_width);
-        let mid_point_y = (game_height / 2.0) - 5.0;
+        let mid_point_y = (game_height / 2.0) as u32;
 
         let texture = midgar.graphics().load_texture("assets/texture.png");
         let texture = Rc::new(texture);
@@ -52,7 +53,7 @@ impl GameRenderer {
         // Load background.
         let mut bg = Sprite::with_sub_field(texture.clone(), (0, 85), (136, 43));
         bg.set_magnify_filter(Some(MagnifySamplerFilter::Nearest));
-        bg.set_position(cgmath::vec2(0.0, mid_point_y - 63.0));
+        bg.set_position(cgmath::vec2(0.0, mid_point_y as f32 - 66.0));
         // Load grass.
         let mut grass = Sprite::with_sub_field(texture.clone(), (0, 74), (143, 11));
         grass.set_magnify_filter(Some(MagnifySamplerFilter::Nearest));
@@ -62,8 +63,8 @@ impl GameRenderer {
         let mut skull_down = Sprite::with_sub_field(texture.clone(), (192, 114), (24, 14));
         skull_down.set_magnify_filter(Some(MagnifySamplerFilter::Nearest));
         skull_down.set_flip_y(true);
-        let mut bar = Sprite::with_sub_field(texture.clone(), (136, 109), (22, 3));
-        bar.set_magnify_filter(Some(MagnifySamplerFilter::Nearest));
+        let mut bar = TextureRegion::with_sub_field(texture.clone(), (136, 109), (22, 3));
+        //bar.set_magnify_filter(Some(MagnifySamplerFilter::Nearest));
         // TODO: Load other sprites.
 
         GameRenderer {
@@ -138,9 +139,9 @@ impl GameRenderer {
             let position = pipe.position();
             let height = pipe.height();
 
-            self.skull_up.set_position(position + cgmath::vec2(1.0, height as f32));
+            self.skull_up.set_position(position + cgmath::vec2(-1.0, height as f32 - 14.0));
             self.sprite_renderer.draw_sprite(&self.skull_up, &self.projection, target);
-            self.skull_down.set_position(position + cgmath::vec2(1.0, 14.0 + 45.0 + height as f32));
+            self.skull_down.set_position(position + cgmath::vec2(-1.0, 45.0 + height as f32));
             self.sprite_renderer.draw_sprite(&self.skull_down, &self.projection, target);
         };
 
@@ -150,19 +151,20 @@ impl GameRenderer {
     }
 
     fn draw_pipes<S: Surface>(&mut self, world: &GameWorld, target: &mut S) {
-        // batcher.draw(bar, pipe1.getX(), pipe1.getY(), pipe1.getWidth(),
-        //         pipe1.getHeight());
-        // batcher.draw(bar, pipe1.getX(), pipe1.getY() + pipe1.getHeight() + 45,
-        //         pipe1.getWidth(), midPointY + 66 - (pipe1.getHeight() + 45));
+        let mut draw_pipe = |pipe: &Pipe| {
+            let position = pipe.position();
+            let width = pipe.width();
+            let height = pipe.height();
 
-        // batcher.draw(bar, pipe2.getX(), pipe2.getY(), pipe2.getWidth(),
-        //         pipe2.getHeight());
-        // batcher.draw(bar, pipe2.getX(), pipe2.getY() + pipe2.getHeight() + 45,
-        //         pipe2.getWidth(), midPointY + 66 - (pipe2.getHeight() + 45));
+            self.sprite_renderer.draw_region(&self.bar, position.x, position.y,
+                                             width as f32, height as f32, &self.projection, target);
+            self.sprite_renderer.draw_region(&self.bar, position.x, position.y + height as f32 + 45.0,
+                                             width as f32, world.mid_point_y() as f32 + 66.0 - (height as f32 + 45.0),
+                                             &self.projection, target);
+        };
 
-        // batcher.draw(bar, pipe3.getX(), pipe3.getY(), pipe3.getWidth(),
-        //         pipe3.getHeight());
-        // batcher.draw(bar, pipe3.getX(), pipe3.getY() + pipe3.getHeight() + 45,
-        //         pipe3.getWidth(), midPointY + 66 - (pipe3.getHeight() + 45));
+        draw_pipe(world.scroller().pipe1());
+        draw_pipe(world.scroller().pipe2());
+        draw_pipe(world.scroller().pipe3());
     }
 }
