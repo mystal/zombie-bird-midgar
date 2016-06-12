@@ -118,6 +118,7 @@ impl GameRenderer {
             GameState::Menu => {
             },
             GameState::GameOver => {
+                self.draw_bird(world, &mut target);
             },
             GameState::HighScore => {
             },

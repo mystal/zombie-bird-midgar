@@ -1,4 +1,7 @@
 use midgar::{Midgar, VirtualKeyCode};
+use nalgebra::{self, Isometry2};
+use ncollide::query;
+use ncollide::shape::Cuboid;
 
 use bird::Bird;
 use scroll_handler::ScrollHandler;
@@ -22,7 +25,7 @@ pub struct GameWorld {
 
     bird: Bird,
     scroller: ScrollHandler,
-    //ground: Ground,
+    ground: Cuboid<nalgebra::Vector2<f32>>,
 }
 
 impl GameWorld {
@@ -38,6 +41,7 @@ impl GameWorld {
 
             bird: Bird::new(33.0, mid_point_y as f32 + 5.0),
             scroller: ScrollHandler::new(mid_point_y as f32 - 66.0),
+            ground: Cuboid::new(nalgebra::Vector2::new(136.0 / 2.0, 11.0 / 2.0)),
         }
     }
 
@@ -47,6 +51,7 @@ impl GameWorld {
         match self.game_state {
             GameState::Menu | GameState::Ready => self.update_ready(midgar, dt),
             GameState::Running => self.update_running(midgar, dt),
+            GameState::GameOver => self.update_game_over(midgar, dt),
             _ => {},
         }
     }
@@ -56,13 +61,55 @@ impl GameWorld {
             self.game_state = GameState::Running;
         }
 
-        self.bird.update_ready(self.run_time);
+        self.bird.update_ready(midgar, self.run_time);
         self.scroller.update_ready(dt);
     }
 
     fn update_running(&mut self, midgar: &Midgar, dt: f32) {
         self.bird.update_running(midgar, dt);
         self.scroller.update_running(dt);
+
+        // if (scroller.collides(bird) && bird.isAlive()) {
+        //     // Clean up on game over
+        //     scroller.stop();
+        //     bird.die();
+        //     AssetLoader.dead.play();
+        // }
+
+        let bird_overlaps_ground = {
+            let (bounding_circle, bird_center) = self.bird.bounding_circle();
+            let ref bird_center = Isometry2::new(bird_center, nalgebra::zero());
+            let ground_center = nalgebra::Vector2::new(136.0 / 2.0, self.mid_point_y as f32 - 71.5);
+            let ref ground_center = Isometry2::new(ground_center, nalgebra::zero());
+            let distance = query::distance(bird_center, bounding_circle,
+                                           ground_center, &self.ground);
+            distance == 0.0
+        };
+
+        if bird_overlaps_ground {
+            self.scroller.stop();
+            self.bird.die();
+            self.bird.decelerate();
+            self.game_state = GameState::GameOver;
+
+            // if (score > AssetLoader.getHighScore()) {
+            //     AssetLoader.setHighScore(score);
+            //     currentState = GameState.HIGHSCORE;
+            // }
+        }
+    }
+
+    fn update_game_over(&mut self, midgar: &Midgar, dt: f32) {
+        if midgar.input().was_key_pressed(&VirtualKeyCode::Space) {
+            self.restart();
+        }
+    }
+
+    fn restart(&mut self) {
+        self.score = 0;
+        self.bird.on_restart(self.mid_point_y as f32 + 5.0);
+        self.scroller.on_restart();
+        self.game_state = GameState::Ready;
     }
 
     pub fn game_state(&self) -> GameState {

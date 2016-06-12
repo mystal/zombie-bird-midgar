@@ -1,7 +1,13 @@
 use cgmath::{self, Vector2};
 use midgar::{Midgar, VirtualKeyCode};
+use nalgebra;
+use ncollide::shape::Ball;
 
 //use units::WorldPosition;
+
+
+pub const BIRD_RADIUS: f32 = 6.5;
+pub const BIRD_GRAVITY: f32 = -460.0;
 
 
 pub struct Bird {
@@ -17,7 +23,7 @@ pub struct Bird {
 
     is_alive: bool,
 
-    // bounding_circle: Circle,
+    bounding_circle: Ball<f32>,
 }
 
 impl Bird {
@@ -25,18 +31,23 @@ impl Bird {
         Bird {
             position: cgmath::vec2(x, y),
             velocity: cgmath::vec2(0.0, 0.0),
-            acceleration: cgmath::vec2(0.0, -460.0),
+            acceleration: cgmath::vec2(0.0, BIRD_GRAVITY),
 
             rotation: 0.0,
 
             original_y: y,
 
             is_alive: true,
+
+            bounding_circle: Ball::new(BIRD_RADIUS),
         }
     }
 
-    pub fn update_ready(&mut self, run_time: f32) {
+    pub fn update_ready(&mut self, midgar: &Midgar, run_time: f32) {
         self.position.y = 2.0 * (7.0 * run_time).sin() + self.original_y;
+        if midgar.input().was_key_pressed(&VirtualKeyCode::Space) {
+            self.on_click();
+        }
     }
 
     pub fn update_running(&mut self, midgar: &Midgar, dt: f32) {
@@ -87,6 +98,26 @@ impl Bird {
         }
     }
 
+    pub fn die(&mut self) {
+        self.is_alive = false;
+        self.velocity.y = 0.0;
+    }
+
+    pub fn decelerate(&mut self) {
+        // We want the bird to stop accelerating downwards once it is dead.
+        self.acceleration.y = 0.0;
+    }
+
+    pub fn on_restart(&mut self, y: f32) {
+        self.rotation = 0.0;
+        self.position.y = y;
+        self.velocity.x = 0.0;
+        self.velocity.y = 0.0;
+        self.acceleration.x = 0.0;
+        self.acceleration.y = BIRD_GRAVITY;
+        self.is_alive = true;
+    }
+
     pub fn is_falling(&self) -> bool {
         self.velocity.y < -110.0
     }
@@ -97,5 +128,10 @@ impl Bird {
 
     pub fn rotation(&self) -> f32 {
         self.rotation
+    }
+
+    pub fn bounding_circle(&self) -> (&Ball<f32>, nalgebra::Vector2<f32>) {
+        let bird_center = nalgebra::Vector2::new(self.position.x + 9.0, self.position.y + 6.0);
+        (&self.bounding_circle, bird_center)
     }
 }

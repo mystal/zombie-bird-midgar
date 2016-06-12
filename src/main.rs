@@ -1,5 +1,7 @@
 extern crate cgmath;
 extern crate midgar;
+extern crate nalgebra;
+extern crate ncollide;
 extern crate rand;
 
 mod app;
