@@ -1,6 +1,10 @@
 use cgmath::{self, Vector2};
+use nalgebra;
+use ncollide::shape::Cuboid;
 use rand;
 use rand::distributions::{IndependentSample, Range};
+
+use bird::Bird;
 
 
 // ScrollHandler will use the constants below to determine
@@ -81,6 +85,29 @@ impl ScrollHandler {
         self.pipe1.stop();
         self.pipe2.stop();
         self.pipe3.stop();
+    }
+
+    pub fn scored(&mut self, bird: &Bird) -> bool {
+        let check_scored = |pipe: &mut Pipe| {
+            let pipe_center = pipe.position().x + (pipe.width() as f32 / 2.0);
+            let bird_right = bird.position().x + bird.width() as f32;
+            if !pipe.is_scored() && pipe_center < bird_right {
+                pipe.set_scored(true);
+                // AssetLoader.coin.play();
+
+                true
+            } else {
+                false
+            }
+        };
+
+        check_scored(&mut self.pipe1) || check_scored(&mut self.pipe2) || check_scored(&mut self.pipe3)
+    }
+
+    // Return true if ANY pipe hits the bird.
+    pub fn collides(&self, bird: &Bird) -> bool {
+        false
+        // self.pipe1.collides(bird) || self.pipe2.collides(bird) || self.pipe3.collides(bird)
     }
 
     pub fn on_restart(&mut self) {
@@ -168,7 +195,10 @@ const SKULL_HEIGHT: u32 = 11;
 pub struct Pipe {
     scrollable: Scrollable,
     range: Range<u32>,
-    //Rectangle skullUp, skullDown, barUp, barDown,
+    skull_up: Cuboid<nalgebra::Vector2<f32>>,
+    skull_down: Cuboid<nalgebra::Vector2<f32>>,
+    bar_up: Cuboid<nalgebra::Vector2<f32>>,
+    bar_down: Cuboid<nalgebra::Vector2<f32>>,
     ground_y: f32,
     is_scored: bool,
 }
@@ -178,6 +208,10 @@ impl Pipe {
         Pipe {
             scrollable: Scrollable::new(x, y, width, height, scroll_speed),
             range: Range::new(0, 90),
+            skull_up: Cuboid::new(nalgebra::Vector2::new(SKULL_WIDTH as f32, SKULL_HEIGHT as f32)),
+            skull_down: Cuboid::new(nalgebra::Vector2::new(SKULL_WIDTH as f32, SKULL_HEIGHT as f32)),
+            bar_up: Cuboid::new(nalgebra::Vector2::new(width as f32, height as f32)),
+            bar_down: Cuboid::new(nalgebra::Vector2::new(width as f32, height as f32)),
             ground_y: ground_y,
             is_scored: false,
         }
@@ -240,6 +274,32 @@ impl Pipe {
 
     pub fn height(&self) -> u32 {
         self.scrollable.height()
+    }
+
+    // pub fn collides(&self, bird: &Bird) -> bool {
+    //     if self.position.x < bird.position().x + bird.width() {
+    //         let (bounding_circle, bird_center) = self.bird.bounding_circle();
+    //         let ref bird_center = Isometry2::new(bird_center, nalgebra::zero());
+    //         let ground_center = nalgebra::Vector2::new(136.0 / 2.0, self.mid_point_y as f32 - 71.5);
+    //         let ref ground_center = Isometry2::new(ground_center, nalgebra::zero());
+    //         let distance = query::distance(bird_center, bounding_circle,
+    //                                        ground_center, &self.ground);
+    //         distance == 0.0
+
+    //         return (Intersector.overlaps(bird.getBoundingCircle(), barUp)
+    //                 || Intersector.overlaps(bird.getBoundingCircle(), barDown)
+    //                 || Intersector.overlaps(bird.getBoundingCircle(), skullUp) || Intersector
+    //                 .overlaps(bird.getBoundingCircle(), skullDown));
+    //     }
+    //     return false;
+    // }
+
+    pub fn is_scored(&self) -> bool {
+        self.is_scored
+    }
+
+    pub fn set_scored(&mut self, scored: bool) {
+        self.is_scored = scored
     }
 }
 

@@ -39,7 +39,7 @@ impl GameWorld {
 
             mid_point_y: mid_point_y,
 
-            bird: Bird::new(33.0, mid_point_y as f32 + 5.0),
+            bird: Bird::new(33.0, mid_point_y as f32 + 5.0, 17, 12),
             scroller: ScrollHandler::new(mid_point_y as f32 - 66.0),
             ground: Cuboid::new(nalgebra::Vector2::new(136.0 / 2.0, 11.0 / 2.0)),
         }
@@ -69,12 +69,17 @@ impl GameWorld {
         self.bird.update_running(midgar, dt);
         self.scroller.update_running(dt);
 
-        // if (scroller.collides(bird) && bird.isAlive()) {
-        //     // Clean up on game over
-        //     scroller.stop();
-        //     bird.die();
-        //     AssetLoader.dead.play();
-        // }
+        if self.scroller.scored(&self.bird) {
+            self.score += 1;
+            // println!("Scored! {}", self.score);
+        }
+
+        if self.scroller.collides(&self.bird) && self.bird.is_alive() {
+            // Clean up on game over
+            self.scroller.stop();
+            self.bird.die();
+            // AssetLoader.dead.play();
+        }
 
         let bird_overlaps_ground = {
             let (bounding_circle, bird_center) = self.bird.bounding_circle();

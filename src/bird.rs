@@ -16,8 +16,8 @@ pub struct Bird {
     acceleration: Vector2<f32>,
 
     rotation: f32,
-    // width: u32,
-    // height: u32,
+    width: u32,
+    height: u32,
 
     original_y: f32,
 
@@ -27,13 +27,15 @@ pub struct Bird {
 }
 
 impl Bird {
-    pub fn new(x: f32, y: f32) -> Self {
+    pub fn new(x: f32, y: f32, width: u32, height: u32) -> Self {
         Bird {
             position: cgmath::vec2(x, y),
             velocity: cgmath::vec2(0.0, 0.0),
             acceleration: cgmath::vec2(0.0, BIRD_GRAVITY),
 
             rotation: 0.0,
+            width: width,
+            height: height,
 
             original_y: y,
 
@@ -126,6 +128,14 @@ impl Bird {
         self.position
     }
 
+    pub fn width(&self) -> u32 {
+        self.width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.height
+    }
+
     pub fn rotation(&self) -> f32 {
         self.rotation
     }
@@ -133,5 +143,9 @@ impl Bird {
     pub fn bounding_circle(&self) -> (&Ball<f32>, nalgebra::Vector2<f32>) {
         let bird_center = nalgebra::Vector2::new(self.position.x + 9.0, self.position.y + 6.0);
         (&self.bounding_circle, bird_center)
+    }
+
+    pub fn is_alive(&self) -> bool {
+        self.is_alive
     }
 }
