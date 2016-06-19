@@ -167,9 +167,9 @@ impl GameRenderer {
             let height = pipe.height();
 
             self.sprite_renderer.draw_region(&self.bar, position.x, position.y,
-                                             width as f32, height as f32, &self.projection, target);
+                                             width as f32, pipe.lower_bar_height(), &self.projection, target);
             self.sprite_renderer.draw_region(&self.bar, position.x, position.y + height as f32 + 45.0,
-                                             width as f32, world.mid_point_y() as f32 + 66.0 - (height as f32 + 45.0),
+                                             width as f32, pipe.upper_bar_height(),
                                              &self.projection, target);
         };
 

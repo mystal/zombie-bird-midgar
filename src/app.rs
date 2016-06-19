@@ -17,6 +17,7 @@ impl App for GameApp {
         let (screen_width, screen_height) = midgar.graphics().screen_size();
         let game_width = 136.0f32;
         let game_height = screen_height as f32 / (screen_width as f32 / game_width);
+        println!("Screen: {:?}, Game: {:?}", (screen_width, screen_height), (game_width, game_height));
 
         GameApp {
             world: GameWorld::new(game_width, game_height),

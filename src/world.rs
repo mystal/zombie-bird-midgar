@@ -39,8 +39,8 @@ impl GameWorld {
 
             mid_point_y: mid_point_y,
 
-            bird: Bird::new(33.0, mid_point_y as f32 + 5.0, 17, 12),
-            scroller: ScrollHandler::new(mid_point_y as f32 - 66.0),
+            bird: Bird::new(33.0, mid_point_y as f32 + 5.0, 17, 12, game_height),
+            scroller: ScrollHandler::new(mid_point_y as f32 - 66.0, game_height),
             ground: Cuboid::new(nalgebra::Vector2::new(136.0 / 2.0, 11.0 / 2.0)),
         }
     }

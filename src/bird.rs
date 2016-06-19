@@ -24,10 +24,11 @@ pub struct Bird {
     is_alive: bool,
 
     bounding_circle: Ball<f32>,
+    game_height: f32,
 }
 
 impl Bird {
-    pub fn new(x: f32, y: f32, width: u32, height: u32) -> Self {
+    pub fn new(x: f32, y: f32, width: u32, height: u32, game_height: f32) -> Self {
         Bird {
             position: cgmath::vec2(x, y),
             velocity: cgmath::vec2(0.0, 0.0),
@@ -42,6 +43,7 @@ impl Bird {
             is_alive: true,
 
             bounding_circle: Ball::new(BIRD_RADIUS),
+            game_height: game_height,
         }
     }
 
@@ -63,17 +65,13 @@ impl Bird {
             self.velocity.y = -200.0;
         }
 
-        // CEILING CHECK
-        // if self.position.y < -13.0 {
-        //     self.position.y = -13.0;
-        //     self.velocity.y = 0.0;
-        // }
+        // Ceiling check.
+        if self.position.y > self.game_height + BIRD_RADIUS {
+            self.position.y = self.game_height + BIRD_RADIUS;
+            self.velocity.y = 0.0;
+        }
 
         self.position += self.velocity * dt;
-
-        // Set the circle's center to be (9, 6) with respect to the bird.
-        // Set the circle's radius to be 6.5f;
-        // boundingCircle.set(position.x + 9, position.y + 6, 6.5f);
 
         // Rotate counterclockwise
         if self.velocity.y > 0.0 {

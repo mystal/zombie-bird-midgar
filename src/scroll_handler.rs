@@ -1,5 +1,6 @@
 use cgmath::{self, Vector2};
-use nalgebra;
+use nalgebra::{self, Isometry2};
+use ncollide::query;
 use ncollide::shape::Cuboid;
 use rand;
 use rand::distributions::{IndependentSample, Range};
@@ -25,13 +26,13 @@ pub struct ScrollHandler {
 impl ScrollHandler {
     // Constructor receives a float that tells us where we need to create our
     // Grass and Pipe objects.
-    pub fn new(y_pos: f32) -> Self {
+    pub fn new(y_pos: f32, game_height: f32) -> Self {
         let front_grass = Grass::new(0.0, y_pos - 11.0, 143, 11, SCROLL_SPEED);
         let back_grass = Grass::new(front_grass.get_tail_x(), y_pos - 11.0, 143, 11, SCROLL_SPEED);
 
-        let pipe1 = Pipe::new(210.0, y_pos, 22, 60, SCROLL_SPEED, y_pos);
-        let pipe2 = Pipe::new(pipe1.get_tail_x() + PIPE_GAP, y_pos, 22, 70, SCROLL_SPEED, y_pos);
-        let pipe3 = Pipe::new(pipe2.get_tail_x() + PIPE_GAP, y_pos, 22, 60, SCROLL_SPEED, y_pos);
+        let pipe1 = Pipe::new(210.0, y_pos, 22, 60, SCROLL_SPEED, y_pos, game_height);
+        let pipe2 = Pipe::new(pipe1.get_tail_x() + PIPE_GAP, y_pos, 22, 70, SCROLL_SPEED, y_pos, game_height);
+        let pipe3 = Pipe::new(pipe2.get_tail_x() + PIPE_GAP, y_pos, 22, 60, SCROLL_SPEED, y_pos, game_height);
 
         ScrollHandler {
             front_grass: front_grass,
@@ -106,8 +107,7 @@ impl ScrollHandler {
 
     // Return true if ANY pipe hits the bird.
     pub fn collides(&self, bird: &Bird) -> bool {
-        false
-        // self.pipe1.collides(bird) || self.pipe2.collides(bird) || self.pipe3.collides(bird)
+        self.pipe1.collides(bird) || self.pipe2.collides(bird) || self.pipe3.collides(bird)
     }
 
     pub fn on_restart(&mut self) {
@@ -195,48 +195,34 @@ const SKULL_HEIGHT: u32 = 11;
 pub struct Pipe {
     scrollable: Scrollable,
     range: Range<u32>,
-    skull_up: Cuboid<nalgebra::Vector2<f32>>,
-    skull_down: Cuboid<nalgebra::Vector2<f32>>,
-    bar_up: Cuboid<nalgebra::Vector2<f32>>,
-    bar_down: Cuboid<nalgebra::Vector2<f32>>,
+    skull_shape: Cuboid<nalgebra::Vector2<f32>>,
+    bar_upper_shape: Cuboid<nalgebra::Vector2<f32>>,
+    bar_lower_shape: Cuboid<nalgebra::Vector2<f32>>,
     ground_y: f32,
+    game_height: f32,
     is_scored: bool,
 }
 
 impl Pipe {
-    fn new(x: f32, y: f32, width: u32, height: u32, scroll_speed: f32, ground_y: f32) -> Self {
-        Pipe {
+    fn new(x: f32, y: f32, width: u32, height: u32, scroll_speed: f32, ground_y: f32,
+           game_height: f32) -> Self {
+        let mut pipe = Pipe {
             scrollable: Scrollable::new(x, y, width, height, scroll_speed),
             range: Range::new(0, 90),
-            skull_up: Cuboid::new(nalgebra::Vector2::new(SKULL_WIDTH as f32, SKULL_HEIGHT as f32)),
-            skull_down: Cuboid::new(nalgebra::Vector2::new(SKULL_WIDTH as f32, SKULL_HEIGHT as f32)),
-            bar_up: Cuboid::new(nalgebra::Vector2::new(width as f32, height as f32)),
-            bar_down: Cuboid::new(nalgebra::Vector2::new(width as f32, height as f32)),
+            skull_shape: Cuboid::new(nalgebra::Vector2::new(SKULL_WIDTH as f32 / 2.0, SKULL_HEIGHT as f32 / 2.0)),
+            // NOTE: Correct bar shapes are set in the call to reset().
+            bar_upper_shape: Cuboid::new(nalgebra::Vector2::new(width as f32 / 2.0, height as f32 / 2.0)),
+            bar_lower_shape: Cuboid::new(nalgebra::Vector2::new(width as f32 / 2.0, height as f32 / 2.0)),
             ground_y: ground_y,
+            game_height: game_height,
             is_scored: false,
-        }
+        };
+        pipe.reset(x);
+        pipe
     }
 
     fn update(&mut self, dt: f32) {
         self.scrollable.update(dt);
-
-        // TODO: Update pipe Rectangles
-
-        // The set() method allows you to set the top left corner's x, y
-        // coordinates, along with the width and height of the rectangle.
-        // barUp.set(position.x, position.y, width, height);
-        // barDown.set(position.x, position.y + height + VERTICAL_GAP, width,
-        //         groundY - (position.y + height + VERTICAL_GAP));
-
-        // Our skull width is 24. The bar is only 22 pixels wide. So the skull
-        // must be shifted by 1 pixel to the left (so that the skull is centered
-        // with respect to its bar).
-
-        // This shift is equivalent to: (SKULL_WIDTH - width) / 2
-        // skullUp.set(position.x - (SKULL_WIDTH - width) / 2, position.y + height
-        //         - SKULL_HEIGHT, SKULL_WIDTH, SKULL_HEIGHT);
-        // skullDown.set(position.x - (SKULL_WIDTH - width) / 2, barDown.y,
-        //         SKULL_WIDTH, SKULL_HEIGHT);
     }
 
     fn on_restart(&mut self, new_x: f32, scroll_speed: f32) {
@@ -250,6 +236,11 @@ impl Pipe {
         let mut rng = rand::thread_rng();
         self.scrollable.height = self.range.ind_sample(&mut rng) + 15;
         self.is_scored = false;
+
+        // Set correct bar shapes for new height.
+        self.bar_lower_shape = Cuboid::new(nalgebra::Vector2::new(self.width() as f32 / 2.0, self.height() as f32 / 2.0));
+        self.bar_upper_shape = Cuboid::new(nalgebra::Vector2::new(
+                self.width() as f32 / 2.0, (self.game_height - (self.position().y + self.height() as f32 + VERTICAL_GAP as f32) / 2.0)));
     }
 
     fn stop(&mut self) {
@@ -276,23 +267,43 @@ impl Pipe {
         self.scrollable.height()
     }
 
-    // pub fn collides(&self, bird: &Bird) -> bool {
-    //     if self.position.x < bird.position().x + bird.width() {
-    //         let (bounding_circle, bird_center) = self.bird.bounding_circle();
-    //         let ref bird_center = Isometry2::new(bird_center, nalgebra::zero());
-    //         let ground_center = nalgebra::Vector2::new(136.0 / 2.0, self.mid_point_y as f32 - 71.5);
-    //         let ref ground_center = Isometry2::new(ground_center, nalgebra::zero());
-    //         let distance = query::distance(bird_center, bounding_circle,
-    //                                        ground_center, &self.ground);
-    //         distance == 0.0
+    pub fn upper_bar_height(&self) -> f32 {
+        self.bar_upper_shape.half_extents().y * 2.0
+    }
 
-    //         return (Intersector.overlaps(bird.getBoundingCircle(), barUp)
-    //                 || Intersector.overlaps(bird.getBoundingCircle(), barDown)
-    //                 || Intersector.overlaps(bird.getBoundingCircle(), skullUp) || Intersector
-    //                 .overlaps(bird.getBoundingCircle(), skullDown));
-    //     }
-    //     return false;
-    // }
+    pub fn lower_bar_height(&self) -> f32 {
+        self.bar_lower_shape.half_extents().y * 2.0
+    }
+
+    pub fn collides(&self, bird: &Bird) -> bool {
+        let bird_right = bird.position().x + bird.width() as f32;
+        if self.position().x < bird_right {
+            // Get the bird's bounding circle.
+            let (bounding_circle, bird_center) = bird.bounding_circle();
+            let ref bird_center = Isometry2::new(bird_center, nalgebra::zero());
+
+            let overlaps = |other_center: &Isometry2<f32>, other_shape| {
+                query::distance(bird_center, bounding_circle,
+                                other_center, other_shape) == 0.0
+            };
+
+            // Get the Pipe's various bounding boxes.
+            let pipe_x_center = self.position().x + self.width() as f32 / 2.0;
+
+            let bar_lower_center = nalgebra::Vector2::new(pipe_x_center,
+                                                          self.position().y + self.height() as f32 / 2.0);
+            let bar_lower_center = Isometry2::new(bar_lower_center, nalgebra::zero());
+
+            let bar_upper_center = nalgebra::Vector2::new(pipe_x_center,
+                                                          self.position().y + VERTICAL_GAP as f32 + self.height() as f32 + self.upper_bar_height() / 2.0);
+            let bar_upper_center = Isometry2::new(bar_upper_center, nalgebra::zero());
+
+            overlaps(&bar_upper_center, &self.bar_upper_shape) ||
+                overlaps(&bar_lower_center, &self.bar_lower_shape)
+        } else {
+            false
+        }
+    }
 
     pub fn is_scored(&self) -> bool {
         self.is_scored
