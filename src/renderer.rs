@@ -2,9 +2,10 @@ use std::rc::Rc;
 
 use cgmath;
 use midgar::{Midgar, MagnifySamplerFilter, Surface, Texture2d};
-use midgar::shape::ShapeRenderer;
-use midgar::sprite::{Sprite, SpriteRenderer};
-use midgar::texture_region::TextureRegion;
+use midgar::graphics::animation::{Animation, PlayMode};
+use midgar::graphics::shape::ShapeRenderer;
+use midgar::graphics::sprite::{Sprite, SpriteRenderer};
+use midgar::graphics::texture_region::TextureRegion;
 
 use scroll_handler::Pipe;
 use world::{GameState, GameWorld};
@@ -22,11 +23,12 @@ pub struct GameRenderer {
     texture: Rc<Texture2d>,
     // logoTexture: Rc<Texture2d>,
 
-    // TODO: Make these TextureRegions since we don't need to store state with them.
-    bird: Sprite,
-    // Animation birdAnimation;
-    // TextureRegion birdDown, birdUp;
+    bird: TextureRegion,
+    bird_up: TextureRegion,
+    bird_down: TextureRegion,
+    bird_animation: Animation,
 
+    // TODO: Make these TextureRegions since we don't need to store state with them.
     bg: Sprite,
     grass: Sprite,
     skull_up: Sprite,
@@ -48,16 +50,28 @@ impl GameRenderer {
         let texture = Rc::new(texture);
 
         // Load bird.
-        let mut bird = Sprite::with_sub_field(texture.clone(), (153, 116), (17, 12));
+        let mut bird = TextureRegion::with_sub_field(texture.clone(), (153, 116), (17, 12));
         bird.set_magnify_filter(Some(MagnifySamplerFilter::Nearest));
         bird.set_alpha(true);
+        let mut bird_up = TextureRegion::with_sub_field(texture.clone(), (170, 116), (17, 12));
+        bird_up.set_magnify_filter(Some(MagnifySamplerFilter::Nearest));
+        bird_up.set_alpha(true);
+        let mut bird_down = TextureRegion::with_sub_field(texture.clone(), (136, 116), (17, 12));
+        bird_down.set_magnify_filter(Some(MagnifySamplerFilter::Nearest));
+        bird_down.set_alpha(true);
+
+        let mut bird_animation = Animation::new(0.06, &[bird_down.clone(), bird.clone(), bird_up.clone()]).unwrap();
+        bird_animation.play_mode = PlayMode::LoopPingPong;
+
         // Load background.
         let mut bg = Sprite::with_sub_field(texture.clone(), (0, 85), (136, 43));
         bg.set_magnify_filter(Some(MagnifySamplerFilter::Nearest));
         bg.set_position(cgmath::vec2(0.0, mid_point_y as f32 - 66.0));
+
         // Load grass.
         let mut grass = Sprite::with_sub_field(texture.clone(), (0, 74), (143, 11));
         grass.set_magnify_filter(Some(MagnifySamplerFilter::Nearest));
+
         // Load pipe.
         let mut skull_up = Sprite::with_sub_field(texture.clone(), (192, 114), (24, 14));
         skull_up.set_magnify_filter(Some(MagnifySamplerFilter::Nearest));
@@ -76,6 +90,10 @@ impl GameRenderer {
             texture: texture,
 
             bird: bird,
+            bird_up: bird_up,
+            bird_down: bird_down,
+            bird_animation: bird_animation,
+
             bg: bg,
             grass: grass,
             skull_up: skull_up,
@@ -132,9 +150,17 @@ impl GameRenderer {
     }
 
     fn draw_bird<S: Surface>(&mut self, world: &GameWorld, target: &mut S) {
-        self.bird.set_position(world.bird().position());
-        self.bird.set_rotation(world.bird().rotation());
-        self.sprite_renderer.draw_sprite(&self.bird, &self.projection, target);
+        let position = world.bird().position();
+        let rotation = world.bird().rotation();
+        let texture = if world.bird().should_flap() {
+            self.bird_animation.current_key_frame(world.run_time())
+        } else {
+            &self.bird
+        };
+
+        self.sprite_renderer.draw_region_with_rotation(texture, position.x, position.y, rotation,
+                                                       texture.size().x as f32, texture.size().y as f32,
+                                                       &self.projection, target);
     }
 
     fn draw_grass<S: Surface>(&mut self, world: &GameWorld, target: &mut S) {

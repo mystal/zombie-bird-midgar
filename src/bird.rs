@@ -58,7 +58,7 @@ impl Bird {
         if midgar.input().was_key_pressed(&VirtualKeyCode::Space) {
             self.on_click();
         }
- 
+
         self.velocity += self.acceleration * dt;
 
         if self.velocity.y < -200.0 {
@@ -120,6 +120,10 @@ impl Bird {
 
     pub fn is_falling(&self) -> bool {
         self.velocity.y < -110.0
+    }
+
+    pub fn should_flap(&self) -> bool {
+        self.is_alive && self.velocity.y > -70.0
     }
 
     pub fn position(&self) -> cgmath::Vector2<f32> {
