@@ -1,3 +1,4 @@
+use ears::AudioController;
 use midgar::{Midgar, VirtualKeyCode};
 use nalgebra::{self, Isometry2};
 use ncollide::query;
@@ -5,6 +6,7 @@ use ncollide::shape::Cuboid;
 
 use bird::Bird;
 use scroll_handler::ScrollHandler;
+use sounds::Sounds;
 
 
 #[derive(Clone, Copy)]
@@ -26,6 +28,8 @@ pub struct GameWorld {
     bird: Bird,
     scroller: ScrollHandler,
     ground: Cuboid<nalgebra::Vector2<f32>>,
+
+    sounds: Sounds,
 }
 
 impl GameWorld {
@@ -42,6 +46,8 @@ impl GameWorld {
             bird: Bird::new(33.0, mid_point_y as f32 + 5.0, 17, 12, game_height),
             scroller: ScrollHandler::new(mid_point_y as f32 - 66.0, game_height),
             ground: Cuboid::new(nalgebra::Vector2::new(136.0 / 2.0, 11.0 / 2.0)),
+
+            sounds: Sounds::new(),
         }
     }
 
@@ -61,24 +67,25 @@ impl GameWorld {
             self.game_state = GameState::Running;
         }
 
-        self.bird.update_ready(midgar, self.run_time);
+        self.bird.update_ready(midgar, self.run_time, &mut self.sounds);
         self.scroller.update_ready(dt);
     }
 
     fn update_running(&mut self, midgar: &Midgar, dt: f32) {
-        self.bird.update_running(midgar, dt);
+        self.bird.update_running(midgar, dt, &mut self.sounds);
         self.scroller.update_running(dt);
 
         if self.scroller.scored(&self.bird) {
             self.score += 1;
             // println!("Scored! {}", self.score);
+            self.sounds.coin.play();
         }
 
         if self.scroller.collides(&self.bird) && self.bird.is_alive() {
             // Clean up on game over
             self.scroller.stop();
             self.bird.die();
-            // AssetLoader.dead.play();
+            self.sounds.dead.play();
         }
 
         let bird_overlaps_ground = {

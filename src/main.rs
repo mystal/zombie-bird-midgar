@@ -1,4 +1,5 @@
 extern crate cgmath;
+extern crate ears;
 extern crate midgar;
 extern crate nalgebra;
 extern crate ncollide;
@@ -8,6 +9,7 @@ mod app;
 mod bird;
 mod renderer;
 mod scroll_handler;
+mod sounds;
 mod world;
 
 

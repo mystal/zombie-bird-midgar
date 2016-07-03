@@ -3,6 +3,7 @@ name = "zombie_bird"
 version = "0.1.0"
 dependencies = [
  "cgmath 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ears 0.3.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "midgar 0.1.0",
  "nalgebra 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "ncollide 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -163,6 +164,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "winapi 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "winapi-build 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "ears"
+version = "0.3.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "libc 0.2.10 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

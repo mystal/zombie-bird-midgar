@@ -5,6 +5,7 @@ authors = ["Gabriel Martinez <reitaka@gmail.com>"]
 
 [dependencies]
 cgmath = "^0.9.1"
+ears = "^0.3.5"
 midgar = { path = "../midgar-engine/midgar" }
 nalgebra = "0.8.2"
 ncollide = "^0.9.0"

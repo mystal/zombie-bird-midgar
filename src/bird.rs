@@ -1,8 +1,10 @@
 use cgmath::{self, Vector2};
+use ears::AudioController;
 use midgar::{Midgar, VirtualKeyCode};
 use nalgebra;
 use ncollide::shape::Ball;
 
+use sounds::Sounds;
 //use units::WorldPosition;
 
 
@@ -47,16 +49,16 @@ impl Bird {
         }
     }
 
-    pub fn update_ready(&mut self, midgar: &Midgar, run_time: f32) {
+    pub fn update_ready(&mut self, midgar: &Midgar, run_time: f32, sounds: &mut Sounds) {
         self.position.y = 2.0 * (7.0 * run_time).sin() + self.original_y;
         if midgar.input().was_key_pressed(&VirtualKeyCode::Space) {
-            self.on_click();
+            self.on_click(sounds);
         }
     }
 
-    pub fn update_running(&mut self, midgar: &Midgar, dt: f32) {
+    pub fn update_running(&mut self, midgar: &Midgar, dt: f32, sounds: &mut Sounds) {
         if midgar.input().was_key_pressed(&VirtualKeyCode::Space) {
-            self.on_click();
+            self.on_click(sounds);
         }
 
         self.velocity += self.acceleration * dt;
@@ -91,10 +93,10 @@ impl Bird {
         }
     }
 
-    fn on_click(&mut self) {
+    fn on_click(&mut self, sounds: &mut Sounds) {
         if self.is_alive {
-            //AssetLoader.flap.play();
             self.velocity.y = 140.0;
+            sounds.flap.play();
         }
     }
 
