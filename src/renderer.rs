@@ -83,8 +83,8 @@ impl GameRenderer {
         // TODO: Load other sprites.
 
         GameRenderer {
-            sprite_renderer: SpriteRenderer::new(&midgar.graphics().display),
-            shape_renderer: ShapeRenderer::new(&midgar.graphics().display),
+            sprite_renderer: SpriteRenderer::new(midgar.graphics().display()),
+            shape_renderer: ShapeRenderer::new(midgar.graphics().display()),
             projection: cgmath::ortho(0.0, game_width, 0.0, game_height, -1.0, 1.0),
 
             texture: texture,
@@ -104,7 +104,7 @@ impl GameRenderer {
 
     pub fn render(&mut self, midgar: &Midgar, dt: f32, world: &GameWorld) {
         // Get framebuffer target.
-        let mut target = midgar.graphics().display.draw();
+        let mut target = midgar.graphics().display().draw();
         target.clear_color(CLEAR_COLOR[0], CLEAR_COLOR[1], CLEAR_COLOR[2], CLEAR_COLOR[3]);
 
         // Draw Background color

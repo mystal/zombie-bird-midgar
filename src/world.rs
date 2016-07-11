@@ -1,5 +1,5 @@
 use ears::AudioController;
-use midgar::{Midgar, VirtualKeyCode};
+use midgar::{Midgar, KeyCode};
 use nalgebra::{self, Isometry2};
 use ncollide::query;
 use ncollide::shape::Cuboid;
@@ -63,7 +63,7 @@ impl GameWorld {
     }
 
     fn update_ready(&mut self, midgar: &Midgar, dt: f32) {
-        if midgar.input().was_key_pressed(&VirtualKeyCode::Space) {
+        if midgar.input().was_key_pressed(&KeyCode::Space) {
             self.game_state = GameState::Running;
         }
 
@@ -112,7 +112,7 @@ impl GameWorld {
     }
 
     fn update_game_over(&mut self, midgar: &Midgar, dt: f32) {
-        if midgar.input().was_key_pressed(&VirtualKeyCode::Space) {
+        if midgar.input().was_key_pressed(&KeyCode::Space) {
             self.restart();
         }
     }

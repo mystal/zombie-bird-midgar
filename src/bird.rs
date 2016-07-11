@@ -1,6 +1,6 @@
 use cgmath::{self, Vector2};
 use ears::AudioController;
-use midgar::{Midgar, VirtualKeyCode};
+use midgar::{Midgar, KeyCode};
 use nalgebra;
 use ncollide::shape::Ball;
 
@@ -51,13 +51,13 @@ impl Bird {
 
     pub fn update_ready(&mut self, midgar: &Midgar, run_time: f32, sounds: &mut Sounds) {
         self.position.y = 2.0 * (7.0 * run_time).sin() + self.original_y;
-        if midgar.input().was_key_pressed(&VirtualKeyCode::Space) {
+        if midgar.input().was_key_pressed(&KeyCode::Space) {
             self.on_click(sounds);
         }
     }
 
     pub fn update_running(&mut self, midgar: &Midgar, dt: f32, sounds: &mut Sounds) {
-        if midgar.input().was_key_pressed(&VirtualKeyCode::Space) {
+        if midgar.input().was_key_pressed(&KeyCode::Space) {
             self.on_click(sounds);
         }
 

@@ -1,4 +1,4 @@
-use midgar::{App, Midgar, VirtualKeyCode};
+use midgar::{App, Midgar, KeyCode};
 
 use renderer::GameRenderer;
 use world::GameWorld;
@@ -26,7 +26,7 @@ impl App for GameApp {
     }
 
     fn step(&mut self, midgar: &mut Midgar) {
-        if midgar.input().was_key_pressed(&VirtualKeyCode::Escape) {
+        if midgar.input().was_key_pressed(&KeyCode::Escape) {
             midgar.set_should_exit();
             return;
         }
