@@ -43,6 +43,6 @@ impl App for GameApp {
     }
 
     fn resize(&mut self, size: (u32, u32), midgar: &Midgar) {
-        self.renderer.resize(size);
+        //self.renderer.resize(size);
     }
 }

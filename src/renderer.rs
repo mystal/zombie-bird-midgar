@@ -146,7 +146,9 @@ impl GameRenderer {
     }
 
     pub fn resize(&mut self, size: (u32, u32)) {
-        self.projection = cgmath::ortho(0.0, size.0 as f32, 0.0, size.1 as f32, -1.0, 1.0);
+        let game_width = 136.0f32;
+        let game_height = size.1 as f32 / (size.0 as f32 / game_width);
+        self.projection = cgmath::ortho(0.0, game_width, 0.0, game_height, -1.0, 1.0);
     }
 
     fn draw_bird<S: Surface>(&mut self, world: &GameWorld, target: &mut S) {
