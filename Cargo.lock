@@ -2,6 +2,7 @@
 name = "zombie_bird"
 version = "0.1.0"
 dependencies = [
+ "bmfont 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "cgmath 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "ears 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "midgar 0.1.0",
@@ -47,6 +48,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "bitflags"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "bmfont"
+version = "0.2.1"
+source = "git+https://github.com/mystal/bmfont-rust?branch=dev#45b0d98b6719ef460e6392ca19191096c20e0080"
+
+[[package]]
+name = "bmfont"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+replace = "bmfont 0.2.1 (git+https://github.com/mystal/bmfont-rust?branch=dev)"
 
 [[package]]
 name = "byteorder"
@@ -534,6 +546,8 @@ dependencies = [
 "checksum backtrace-sys 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)" = "3602e8d8c43336088a8505fa55cae2b3884a9be29440863a11528a42f46f6bb7"
 "checksum bitflags 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)" = "72cd7314bd4ee024071241147222c706e80385a1605ac7d4cd2fcc339da2ae46"
 "checksum bitflags 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "aad18937a628ec6abcd26d1489012cc0e18c21798210f491af69ded9b881106d"
+"checksum bmfont 0.2.1 (git+https://github.com/mystal/bmfont-rust?branch=dev)" = "<none>"
+"checksum bmfont 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "0c566f676f40db2583f5cb9273e6143226109248e6d41487dd9f11173f3dec75"
 "checksum byteorder 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)" = "0fc10e8cc6b2580fda3f36eb6dc5316657f812a3df879a44a66fc9f0fdbc4855"
 "checksum byteorder 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "c40977b0ee6b9885c9013cd41d9feffdd22deb3bb4dc3a71d901cc7a77de18c8"
 "checksum cfg-if 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "de1e760d7b6535af4241fca8bd8adf68e2e7edacc6b29f5d399050c5e48cf88c"

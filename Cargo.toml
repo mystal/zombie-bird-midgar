@@ -4,9 +4,13 @@ version = "0.1.0"
 authors = ["Gabriel Martinez <reitaka@gmail.com>"]
 
 [dependencies]
+bmfont = "^0.2.1"
 cgmath = "^0.12.0"
 ears = "^0.4.0"
 midgar = { path = "../midgar-engine/midgar" }
 nalgebra = "0.8.2"
 ncollide = "^0.9.0"
 rand = "^0.3.0"
+
+[replace]
+"bmfont:0.2.1" = { git = "https://github.com/mystal/bmfont-rust", branch = "dev" }
