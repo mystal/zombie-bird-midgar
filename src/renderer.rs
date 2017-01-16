@@ -6,6 +6,7 @@ use midgar::graphics::animation::{Animation, PlayMode};
 use midgar::graphics::shape::ShapeRenderer;
 use midgar::graphics::sprite::{Sprite, SpriteRenderer};
 use midgar::graphics::texture_region::TextureRegion;
+use midgar::graphics::texture_region::TextureRegionHolder;
 
 use scroll_handler::Pipe;
 use world::{GameState, GameWorld};
@@ -46,7 +47,7 @@ impl GameRenderer {
         let game_height = screen_height as f32 / (screen_width as f32 / game_width);
         let mid_point_y = (game_height / 2.0) as u32;
 
-        let texture = midgar.graphics().load_texture("assets/texture.png");
+        let texture = midgar.graphics().load_texture("assets/texture.png", true);
         let texture = Rc::new(texture);
 
         // Load bird.
