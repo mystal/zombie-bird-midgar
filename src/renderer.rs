@@ -158,6 +158,7 @@ impl GameRenderer {
             },
             GameState::Ready => {
                 self.draw_bird(world, &mut target);
+                self.draw_score(world, &mut target);
             },
             GameState::Menu => {
             },
@@ -245,7 +246,7 @@ impl GameRenderer {
         //let score_text = format!("{:02}", world.score());
         let text_length = score_text.len();
 
-        let start_position = (68.0 - (3.0 * text_length as f32), world.mid_point_y() as f32 + 82.0);
+        let start_position = (68.0 - (3.0 * text_length as f32), world.mid_point_y() as f32 + 64.0);
         let shadow_positions = self.shadow_font.parse(&score_text).unwrap();
         for pos in shadow_positions {
             let offset = (pos.page_rect.x as u32, pos.page_rect.y as u32);
@@ -263,7 +264,7 @@ impl GameRenderer {
                                              &self.projection, target);
         }
 
-        let start_position = (68.0 - (3.0 * text_length as f32), world.mid_point_y() as f32 + 83.0);
+        let start_position = (68.0 - (3.0 * text_length as f32), world.mid_point_y() as f32 + 65.0);
         let text_positions = self.text_font.parse(&score_text).unwrap();
         for pos in text_positions {
             let offset = (pos.page_rect.x as u32, pos.page_rect.y as u32);
