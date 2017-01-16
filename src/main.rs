@@ -1,3 +1,4 @@
+extern crate bmfont;
 extern crate cgmath;
 extern crate ears;
 extern crate midgar;

@@ -128,6 +128,10 @@ impl GameWorld {
         self.game_state
     }
 
+    pub fn score(&self) -> u32 {
+        self.score
+    }
+
     pub fn run_time(&self) -> f32 {
         self.run_time
     }

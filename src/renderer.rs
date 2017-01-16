@@ -1,5 +1,7 @@
+use std::fs::File;
 use std::rc::Rc;
 
+use bmfont::{BMFont, OrdinateOrientation};
 use cgmath;
 use midgar::{Midgar, MagnifySamplerFilter, Surface, Texture2d};
 use midgar::graphics::animation::{Animation, PlayMode};
@@ -21,6 +23,11 @@ pub struct GameRenderer {
 
     texture: Rc<Texture2d>,
     // logoTexture: Rc<Texture2d>,
+    text_texture: Rc<Texture2d>,
+    shadow_texture: Rc<Texture2d>,
+
+    text_font: BMFont,
+    shadow_font: BMFont,
 
     bird: TextureRegion,
     bird_up: TextureRegion,
@@ -47,6 +54,20 @@ impl GameRenderer {
 
         let texture = midgar.graphics().load_texture("assets/texture.png", true);
         let texture = Rc::new(texture);
+
+        let text_texture = midgar.graphics().load_texture("assets/text.png", false);
+        let text_texture = Rc::new(text_texture);
+        let shadow_texture = midgar.graphics().load_texture("assets/shadow.png", false);
+        let shadow_texture = Rc::new(shadow_texture);
+
+        let text_font = {
+            let file = File::open("assets/text.fnt").unwrap();
+            BMFont::new(file, OrdinateOrientation::TopToBottom).unwrap()
+        };
+        let shadow_font = {
+            let file = File::open("assets/shadow.fnt").unwrap();
+            BMFont::new(file, OrdinateOrientation::TopToBottom).unwrap()
+        };
 
         // Load bird.
         let mut bird = TextureRegion::with_sub_field(texture.clone(), (153, 116), (17, 12));
@@ -78,7 +99,7 @@ impl GameRenderer {
         skull_down.set_magnify_filter(Some(MagnifySamplerFilter::Nearest));
         skull_down.set_flip_y(true);
         let mut bar = TextureRegion::with_sub_field(texture.clone(), (136, 109), (22, 3));
-        //bar.set_magnify_filter(Some(MagnifySamplerFilter::Nearest));
+        bar.set_magnify_filter(Some(MagnifySamplerFilter::Nearest));
         // TODO: Load other sprites.
 
         let projection = cgmath::ortho(0.0, game_width, 0.0, game_height, -1.0, 1.0);
@@ -88,6 +109,11 @@ impl GameRenderer {
             shape_renderer: ShapeRenderer::new(midgar.graphics().display(), projection),
 
             texture: texture,
+            text_texture: text_texture,
+            shadow_texture: shadow_texture,
+
+            text_font: text_font,
+            shadow_font: shadow_font,
 
             bird: bird,
             bird_up: bird_up,
@@ -124,10 +150,11 @@ impl GameRenderer {
         self.draw_pipes(world, &mut target);
         self.draw_skulls(world, &mut target);
 
-        // TODO: Draw world.
+        // Draw world.
         match world.game_state() {
             GameState::Running => {
                 self.draw_bird(world, &mut target);
+                self.draw_score(world, &mut target);
             },
             GameState::Ready => {
                 self.draw_bird(world, &mut target);
@@ -136,8 +163,11 @@ impl GameRenderer {
             },
             GameState::GameOver => {
                 self.draw_bird(world, &mut target);
+                self.draw_score(world, &mut target);
             },
             GameState::HighScore => {
+                self.draw_bird(world, &mut target);
+                self.draw_score(world, &mut target);
             },
         }
 
@@ -206,5 +236,49 @@ impl GameRenderer {
         draw_pipe(world.scroller().pipe1());
         draw_pipe(world.scroller().pipe2());
         draw_pipe(world.scroller().pipe3());
+    }
+
+    fn draw_score<S: Surface>(&mut self, world: &GameWorld, target: &mut S) {
+        let scale = 0.25;
+
+        let score_text: String = world.score().to_string();
+        //let score_text = format!("{:02}", world.score());
+        let text_length = score_text.len();
+
+        let start_position = (68.0 - (3.0 * text_length as f32), world.mid_point_y() as f32 + 82.0);
+        let shadow_positions = self.shadow_font.parse(&score_text).unwrap();
+        for pos in shadow_positions {
+            let offset = (pos.page_rect.x as u32, pos.page_rect.y as u32);
+            let size = (pos.page_rect.width, pos.page_rect.height);
+            let mut region = TextureRegion::with_sub_field(self.shadow_texture.clone(), offset, size);
+            region.set_flip_y(true);
+            region.set_scale(scale);
+            region.set_alpha(true);
+            region.set_magnify_filter(Some(MagnifySamplerFilter::Nearest));
+            let position = (start_position.0 + pos.screen_rect.x as f32 * scale,
+                            start_position.1 + pos.screen_rect.y as f32 * scale);
+
+            self.sprite_renderer.draw_region(&region, position.0 as f32, position.1 as f32,
+                                             region.size().x as f32, region.size().y as f32,
+                                             &self.projection, target);
+        }
+
+        let start_position = (68.0 - (3.0 * text_length as f32), world.mid_point_y() as f32 + 83.0);
+        let text_positions = self.text_font.parse(&score_text).unwrap();
+        for pos in text_positions {
+            let offset = (pos.page_rect.x as u32, pos.page_rect.y as u32);
+            let size = (pos.page_rect.width, pos.page_rect.height);
+            let mut region = TextureRegion::with_sub_field(self.text_texture.clone(), offset, size);
+            region.set_flip_y(true);
+            region.set_scale(scale);
+            region.set_alpha(true);
+            region.set_magnify_filter(Some(MagnifySamplerFilter::Nearest));
+            let position = (start_position.0 + pos.screen_rect.x as f32 * scale,
+                            start_position.1 + pos.screen_rect.y as f32 * scale);
+
+            self.sprite_renderer.draw_region(&region, position.0 as f32, position.1 as f32,
+                                             region.size().x as f32, region.size().y as f32,
+                                             &self.projection, target);
+        }
     }
 }
