@@ -7,6 +7,8 @@ use world::GameWorld;
 pub struct GameApp {
     world: GameWorld,
     renderer: GameRenderer,
+
+    time_to_fps: f64,
 }
 
 impl App for GameApp {
@@ -22,6 +24,8 @@ impl App for GameApp {
         GameApp {
             world: GameWorld::new(game_width, game_height),
             renderer: GameRenderer::new(midgar),
+
+            time_to_fps: 1.0,
         }
     }
 
@@ -40,6 +44,13 @@ impl App for GameApp {
 
         // Render game world.
         self.renderer.render(midgar, dt as f32, &self.world);
+
+        // Print FPS every second.
+        self.time_to_fps -= dt;
+        if self.time_to_fps <= 0.0 {
+            println!("FPS: {:.2}, Frame time: {:.2} ms", midgar.fps(), midgar.frame_time() * 1000.0);
+            self.time_to_fps = 1.0;
+        }
     }
 
     fn resize(&mut self, size: (u32, u32), midgar: &Midgar) {
