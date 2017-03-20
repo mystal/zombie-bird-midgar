@@ -19,8 +19,6 @@ pub struct GameRenderer {
     sprite_renderer: SpriteRenderer,
     shape_renderer: ShapeRenderer,
 
-    projection: cgmath::Matrix4<f32>,
-
     texture: Rc<Texture2d>,
     // logoTexture: Rc<Texture2d>,
 
@@ -83,10 +81,11 @@ impl GameRenderer {
         //bar.set_magnify_filter(Some(MagnifySamplerFilter::Nearest));
         // TODO: Load other sprites.
 
+        let projection = cgmath::ortho(0.0, game_width, 0.0, game_height, -1.0, 1.0);
+
         GameRenderer {
-            sprite_renderer: SpriteRenderer::new(midgar.graphics().display()),
-            shape_renderer: ShapeRenderer::new(midgar.graphics().display()),
-            projection: cgmath::ortho(0.0, game_width, 0.0, game_height, -1.0, 1.0),
+            sprite_renderer: SpriteRenderer::new(midgar.graphics().display(), projection),
+            shape_renderer: ShapeRenderer::new(midgar.graphics().display(), projection),
 
             texture: texture,
 
@@ -111,15 +110,14 @@ impl GameRenderer {
         // Draw Background color
         let color = [55.0 / 255.0, 80.0 / 255.0, 100.0 / 255.0];
         self.shape_renderer.draw_filled_rect(0.0, world.mid_point_y() as f32 - 23.0, 136.0, world.mid_point_y() as f32 + 23.0,
-                                             color, &self.projection, &mut target);
+                                             color, &mut target);
 
         // Draw Dirt
         let color = [147.0 / 255.0, 80.0 / 255.0, 27.0 / 255.0];
-        self.shape_renderer.draw_filled_rect(0.0, 0.0, 136.0, 52.0, color,
-                                             &self.projection, &mut target);
+        self.shape_renderer.draw_filled_rect(0.0, 0.0, 136.0, 52.0, color, &mut target);
 
         // Draw world background.
-        self.sprite_renderer.draw_sprite(&self.bg, &self.projection, &mut target);
+        self.sprite_renderer.draw_sprite(&self.bg, &mut target);
 
         // Draw grass and pipes.
         self.draw_grass(world, &mut target);
@@ -149,7 +147,10 @@ impl GameRenderer {
     pub fn resize(&mut self, size: (u32, u32)) {
         let game_width = 136.0f32;
         let game_height = size.1 as f32 / (size.0 as f32 / game_width);
-        self.projection = cgmath::ortho(0.0, game_width, 0.0, game_height, -1.0, 1.0);
+        let projection = cgmath::ortho(0.0, game_width, 0.0, game_height, -1.0, 1.0);
+
+        self.sprite_renderer.set_projection_matrix(projection);
+        self.shape_renderer.set_projection_matrix(projection);
     }
 
     fn draw_bird<S: Surface>(&mut self, world: &GameWorld, target: &mut S) {
@@ -163,14 +164,14 @@ impl GameRenderer {
 
         self.sprite_renderer.draw_region_with_rotation(texture, position.x, position.y, rotation,
                                                        texture.size().x as f32, texture.size().y as f32,
-                                                       &self.projection, target);
+                                                       target);
     }
 
     fn draw_grass<S: Surface>(&mut self, world: &GameWorld, target: &mut S) {
         self.grass.set_position(world.scroller().front_grass().position());
-        self.sprite_renderer.draw_sprite(&self.grass, &self.projection, target);
+        self.sprite_renderer.draw_sprite(&self.grass, target);
         self.grass.set_position(world.scroller().back_grass().position());
-        self.sprite_renderer.draw_sprite(&self.grass, &self.projection, target);
+        self.sprite_renderer.draw_sprite(&self.grass, target);
     }
 
     fn draw_skulls<S: Surface>(&mut self, world: &GameWorld, target: &mut S) {
@@ -179,9 +180,9 @@ impl GameRenderer {
             let height = pipe.height();
 
             self.skull_up.set_position(position + cgmath::vec2(-1.0, height as f32 - 14.0));
-            self.sprite_renderer.draw_sprite(&self.skull_up, &self.projection, target);
+            self.sprite_renderer.draw_sprite(&self.skull_up, target);
             self.skull_down.set_position(position + cgmath::vec2(-1.0, 45.0 + height as f32));
-            self.sprite_renderer.draw_sprite(&self.skull_down, &self.projection, target);
+            self.sprite_renderer.draw_sprite(&self.skull_down, target);
         };
 
         draw_skull(world.scroller().pipe1());
@@ -196,10 +197,10 @@ impl GameRenderer {
             let height = pipe.height();
 
             self.sprite_renderer.draw_region(&self.bar, position.x, position.y,
-                                             width as f32, pipe.lower_bar_height(), &self.projection, target);
+                                             width as f32, pipe.lower_bar_height(), target);
             self.sprite_renderer.draw_region(&self.bar, position.x, position.y + height as f32 + 45.0,
                                              width as f32, pipe.upper_bar_height(),
-                                             &self.projection, target);
+                                             target);
         };
 
         draw_pipe(world.scroller().pipe1());
