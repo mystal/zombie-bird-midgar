@@ -261,7 +261,7 @@ impl GameRenderer {
 
             self.sprite_renderer.draw_region(&region, position.0 as f32, position.1 as f32,
                                              region.size().x as f32, region.size().y as f32,
-                                             &self.projection, target);
+                                             target);
         }
 
         let start_position = (68.0 - (3.0 * text_length as f32), world.mid_point_y() as f32 + 65.0);
@@ -279,7 +279,7 @@ impl GameRenderer {
 
             self.sprite_renderer.draw_region(&region, position.0 as f32, position.1 as f32,
                                              region.size().x as f32, region.size().y as f32,
-                                             &self.projection, target);
+                                             target);
         }
     }
 }
