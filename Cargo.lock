@@ -5,7 +5,7 @@ dependencies = [
  "bmfont 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "cgmath 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "ears 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "midgar 0.1.0",
+ "midgar 0.1.0 (git+https://github.com/mystal/midgar-engine)",
  "nalgebra 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "ncollide 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.3.15 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -261,12 +261,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "midgar"
 version = "0.1.0"
+source = "git+https://github.com/mystal/midgar-engine#19962c6dfbbf5e8ce059f814b7fcaffa66bd2015"
 dependencies = [
  "cgmath 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "glium 0.14.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "glium_sdl2 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "image 0.10.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "moving-average 0.1.0",
+ "moving-average 0.1.0 (git+https://github.com/mystal/moving-average)",
  "sdl2 0.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -282,6 +283,7 @@ dependencies = [
 [[package]]
 name = "moving-average"
 version = "0.1.0"
+source = "git+https://github.com/mystal/moving-average#cb646c661bd41dc1704197933d803f1fcee708a8"
 dependencies = [
  "num-traits 0.1.36 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -575,7 +577,9 @@ dependencies = [
 "checksum libc 0.2.19 (registry+https://github.com/rust-lang/crates.io-index)" = "9e030dc72013ed68994d1b2cbf36a94dd0e58418ba949c4b0db7eeb70a7a6352"
 "checksum log 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)" = "ab83497bf8bf4ed2a74259c1c802351fcd67a65baa86394b6ba73c36f4838054"
 "checksum lzw 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)" = "7d947cbb889ed21c2a84be6ffbaebf5b4e0f4340638cba0444907e38b56be084"
+"checksum midgar 0.1.0 (git+https://github.com/mystal/midgar-engine)" = "<none>"
 "checksum miniz-sys 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)" = "9d1f4d337a01c32e1f2122510fed46393d53ca35a7f429cb0450abaedfa3ed54"
+"checksum moving-average 0.1.0 (git+https://github.com/mystal/moving-average)" = "<none>"
 "checksum nalgebra 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)" = "8b5e68da68cda7f451505587de1b63cadb09188e53f38d8c2716a4a4a6d43eeb"
 "checksum ncollide 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)" = "7064752e557e9068f660addcbca119ab851336547c35f15f47be1888c3bb6971"
 "checksum ncollide_geometry 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "6e123e2e2e06ace3cfb058d31ca478fb81b74c4f9a76b7ef56f9fcefcc442181"

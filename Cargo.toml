@@ -7,7 +7,7 @@ authors = ["Gabriel Martinez <reitaka@gmail.com>"]
 bmfont = "^0.2.1"
 cgmath = "^0.12.0"
 ears = "^0.4.0"
-midgar = { path = "../midgar-engine/midgar" }
+midgar = { git = "https://github.com/mystal/midgar-engine" }
 nalgebra = "0.8.2"
 ncollide = "^0.9.0"
 rand = "^0.3.0"
