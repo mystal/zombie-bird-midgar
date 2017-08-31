@@ -63,7 +63,7 @@ impl GameWorld {
     }
 
     fn update_ready(&mut self, midgar: &Midgar, dt: f32) {
-        if midgar.input().was_key_pressed(&KeyCode::Space) {
+        if midgar.input().was_key_pressed(KeyCode::Space) {
             self.game_state = GameState::Running;
         }
 
@@ -75,7 +75,7 @@ impl GameWorld {
         self.bird.update_running(midgar, dt, &mut self.sounds);
         self.scroller.update_running(dt);
 
-        if self.scroller.scored(&self.bird) {
+        if self.scroller.scored(&self.bird) || midgar.input().was_key_pressed(KeyCode::Return) {
             self.score += 1;
             // println!("Scored! {}", self.score);
             self.sounds.coin.play();
@@ -112,7 +112,7 @@ impl GameWorld {
     }
 
     fn update_game_over(&mut self, midgar: &Midgar, dt: f32) {
-        if midgar.input().was_key_pressed(&KeyCode::Space) {
+        if midgar.input().was_key_pressed(KeyCode::Space) {
             self.restart();
         }
     }
