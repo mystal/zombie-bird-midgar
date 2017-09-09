@@ -201,6 +201,7 @@ impl<'a> GameRenderer<'a> {
         let draw_params = SpriteDrawParams::new().magnify_filter(MagnifySamplerFilter::Nearest);
         let mut draw_skull = |pipe: &Pipe| {
             let position = pipe.position();
+            //let position = cgmath::vec2(position.x.round(), position.y.round());
             let height = pipe.height();
 
             self.skull_up.set_position(position + cgmath::vec2(-1.0, height as f32 - 14.0));
@@ -224,6 +225,7 @@ impl<'a> GameRenderer<'a> {
 
             // TODO: Set width/height on a sprite to extend it before scaling it.
 
+            // TODO: round positions?
             let mut sprite = self.bar.draw(position.x, position.y);
             sprite.set_scale(cgmath::vec2(1.0, pipe.lower_bar_height() / pipe_texture_height));
             self.sprite_renderer.draw(&sprite, draw_params, target);
